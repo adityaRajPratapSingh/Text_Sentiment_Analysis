@@ -35,18 +35,19 @@ training_labels=all_labels[:split]
 testing_sentences=all_sentences[split:]
 testing_labels=all_labels[split:]
 
-training_labels=np.array(training_labels)
-testing_labels=np.array(testing_labels)
-
 tokenizer=Tokenizer(oov_token=G.OOV_TOKEN, num_words=G.NUM_WORDS)
 tokenizer.fit_on_texts(training_sentences)
 sequences=tokenizer.texts_to_sequences(training_sentences)
 padded_sequences=pad_sequences(sequences, maxlen=G.MAXLEN, padding=G.PADDING, truncating=G.TRUNCATING)
 
 testing_sequences=tokenizer.texts_to_sequences(testing_sentences)
-padded_testing_sequences=padded_sequences(testing_sequences, maxlen=G.MAXLEN, padding=G.PADDING, truncating=G.TRUNCATING)
+padded_testing_sequences=pad_sequences(testing_sequences, maxlen=G.MAXLEN, padding=G.PADDING, truncating=G.TRUNCATING)
 
-lr_schedule = tf.keras.callbacks.LerarningRateScheduler(
+training_labels=np.array(training_labels, dtype=np.int32)
+testing_labels=np.array(testing_labels, dtype=np.int32)
+
+
+lr_schedule = tf.keras.callbacks.LearningRateScheduler(
     lambda epoch:1e-8 * 10**(epoch /20)
 )
 
@@ -55,10 +56,9 @@ early_stop=tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=G.STOP_
 model=tf.keras.Sequential([
     tf.keras.layers.Embedding(G.NUM_WORDS, G.EMB_DIM, input_length=G.MAXLEN),
     tf.keras.layers.GlobalAveragePooling1D(),
-    tf.keras.layers.Dense(2048, activation='relu'),
-    tf.keras.layers.Dense(1024, activation='relu'),
+    #tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256, return_sequences=True)),
+    #tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256)),    
     tf.keras.layers.Dense(512, activation='relu'),
-    tf.keras.layers.Dense(256, activation='relu'),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(6, activation='softmax')
