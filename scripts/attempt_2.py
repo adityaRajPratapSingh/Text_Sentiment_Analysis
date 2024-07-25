@@ -6,16 +6,18 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 class G:
-    EPOCHS = 50
+    EPOCHS1 = 40
+    EPOCHS2=200
+    LR_TRAIN=True
     DATA_SPLIT=0.9
     NUM_WORDS=100000
     OOV_TOKEN='<OOV>'
     PADDING='post'
     TRUNCATING='post'
     MAXLEN=120
-    OPTIMIZER=tf.keras.optimizers.Adam()
+    LR_OPTIMIZER=tf.keras.optimizers.Adam()
     LOSS=tf.keras.losses.sparse_categorical_crossentropy
-    STOP_PATIENCE=20
+    STOP_PATIENCE=5
     EMB_DIM=64
 
 all_sentences, all_labels = [], []
@@ -48,26 +50,35 @@ testing_labels=np.array(testing_labels, dtype=np.int32)
 
 
 lr_schedule = tf.keras.callbacks.LearningRateScheduler(
-    lambda epoch:1e-8 * 10**(epoch /20)
+    lambda epoch:1e-8 * 10**(epoch /5)
 )
 
 early_stop=tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=G.STOP_PATIENCE)
 
 model=tf.keras.Sequential([
     tf.keras.layers.Embedding(G.NUM_WORDS, G.EMB_DIM, input_length=G.MAXLEN),
-    tf.keras.layers.GlobalAveragePooling1D(),
-    #tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256, return_sequences=True)),
-    #tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256)),    
-    tf.keras.layers.Dense(512, activation='relu'),
+    #tf.keras.layers.GlobalAveragePooling1D(),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256, return_sequences=True)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256)),    
+    #tf.keras.layers.Dense(512, activation='relu'),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dense(6, activation='softmax')
 ])
 
-model.compile(
-    loss=G.LOSS,
-    optimizer=G.OPTIMIZER,
-    metrics=['accuracy']
-)
 
-model.fit(padded_sequences, training_labels, epochs=G.EPOCHS, validation_data=(padded_testing_sequences, testing_labels), callbacks=[lr_schedule, early_stop])
+if G.LR_TRAIN==True:
+    model.compile(
+        loss=G.LOSS,
+        optimizer=G.LR_OPTIMIZER,
+        metrics=['accuracy']
+    )
+    model.fit(padded_sequences, training_labels, epochs=G.EPOCHS1, validation_data=(padded_testing_sequences, testing_labels), callbacks=[lr_schedule, early_stop])
+
+if G.LR_TRAIN==False:
+    model.compile(
+        loss=G.LOSS,
+        optimizer=tf.keras.optimizers.Adam(learning_rate=),
+        metrics=['accuracy']
+    )
+    model.fit(padded_sequences, training_labels, epochs=G.EPOCHS2, validation_data=(padded_testing_sequences, testing_labels), callbacks=[early_stop])
