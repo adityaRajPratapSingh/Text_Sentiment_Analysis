@@ -6,7 +6,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 class G:
-    EPOCHS1 = 40
+    EPOCHS1 = 20
     EPOCHS2=200
     LR_TRAIN=True
     DATA_SPLIT=0.9
@@ -58,8 +58,8 @@ early_stop=tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=G.STOP_
 model=tf.keras.Sequential([
     tf.keras.layers.Embedding(G.NUM_WORDS, G.EMB_DIM, input_length=G.MAXLEN),
     #tf.keras.layers.GlobalAveragePooling1D(),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256, return_sequences=True)),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256)),    
+    tf.keras.layers.Bidirectional(tf.keras.layers.GRU(256, return_sequences=True)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.GRU(256)),    
     #tf.keras.layers.Dense(512, activation='relu'),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dense(64, activation='relu'),
@@ -78,7 +78,7 @@ if G.LR_TRAIN==True:
 if G.LR_TRAIN==False:
     model.compile(
         loss=G.LOSS,
-        optimizer=tf.keras.optimizers.Adam(learning_rate=),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=None),
         metrics=['accuracy']
     )
     model.fit(padded_sequences, training_labels, epochs=G.EPOCHS2, validation_data=(padded_testing_sequences, testing_labels), callbacks=[early_stop])
