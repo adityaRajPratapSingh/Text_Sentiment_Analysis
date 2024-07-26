@@ -59,7 +59,7 @@ model=tf.keras.Sequential([
     tf.keras.layers.Embedding(G.NUM_WORDS, G.EMB_DIM),
     #tf.keras.layers.GlobalAveragePooling1D(),
     #tf.keras.layers.Bidirectional(tf.keras.layers.GRU(256, return_sequences=True)),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256)),    
+    tf.keras.layers.GRU(256),    
     #tf.keras.layers.Dense(512, activation='relu'),
     #tf.keras.layers.Dense(128, activation='relu'),
     #tf.keras.layers.Dense(64, activation='relu'),
