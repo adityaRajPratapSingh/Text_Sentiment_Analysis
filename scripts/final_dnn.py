@@ -83,3 +83,4 @@ if G.LR_TRAIN==False:
         metrics=['accuracy']
     )
     model.fit(padded_sequences, training_labels, epochs=G.EPOCHS2, validation_data=(padded_testing_sequences, testing_labels), callbacks=[early_stop])
+    model.save('/home/magellan/envs/tensorflow_cuda_1/project/dnn_1.h5')
